@@ -72,6 +72,47 @@ def plot_starts(t, start_conditions_list, parameters, ris):
     plt.clf()
     plt.close()
 
+def plot_params(t, start_conditions, param_list, ris):
+    N_plots = len(param_list)
+    ratios = [1, 1] if N_plots == 1 else [6, 3]
+
+    fig, axs = plt.subplots(1, 2, figsize=(12, 5),  width_ratios=ratios)
+
+    for i in range(N_plots):
+        x0, y0 = start_conditions[0], start_conditions[1]
+        parameters = param_list[i]
+        print(parameters)
+        alpha = parameters[0]
+
+        system = rungeKutta(t, start_conditions, parameters)
+
+        style = "-" if i % 2 == 0 else "--"
+        if N_plots == 1:
+            axs[0].plot(t, system[:, 0], label=rf"Жертвы, $\alpha = {alpha}$")
+            axs[0].plot(t, system[:, 1], label=rf"Хищники, $\alpha = {alpha}$")
+            axs[1].plot(system[:, 0], system[:, 1])
+        else:
+            axs[0].plot(t, system[:, 0], linestyle=style, label=rf"$x(t), \alpha = {alpha}$")
+            axs[0].plot(t, system[:, 1], linestyle=style, label=rf"$y(t), \alpha = {alpha}$")
+            axs[1].plot(system[:, 0], system[:, 1], linestyle=style, label=rf"$\alpha = {alpha}$")
+
+        if i == N_plots - 1:
+            axs[1].plot([x0], [y0], "o", color="red", label="Нач. точка")
+        else:
+            axs[1].plot([x0], [y0], "o", color="red")
+
+    axs[0].set_xlabel(r"$t$, сут")
+    axs[0].set_ylabel(r"Численность популяции")
+    axs[0].grid()
+    axs[0].legend(loc="upper right")
+    axs[1].set_xlabel(r"Численность популяции жертв")
+    axs[1].set_ylabel(r"Численность популяции хищников")
+    axs[1].grid()
+    axs[1].legend()
+    plt.savefig(f"ris_{ris}.png", bbox_inches='tight')
+    plt.show()
+    plt.clf()
+    plt.close()
 
 
 if __name__ == '__main__':
@@ -98,3 +139,9 @@ if __name__ == '__main__':
               [4, 5]]
 
     plot_starts(t, starts2, parameters, 2)
+
+    b = 20
+    t = np.linspace(a, b, N + 1)
+
+    param_list =  [[0.4], [2]]
+    plot_params(t, starts1[0], param_list, 3)
