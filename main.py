@@ -32,27 +32,37 @@ def rungeKutta(x, start_conditions, param_list):
     return y
 
 
-def plot_starts(t, start_conditions_list, param_list, ris):
-    fig, axs = plt.subplots(1, 2, figsize=(12, 5))
+def plot_starts(t, start_conditions_list, parameters, ris):
     N_plots = len(start_conditions_list)
+    ratios = [1, 1] if N_plots == 1 else [6, 3]
+
+    fig, axs = plt.subplots(1, 2, figsize=(12, 5),  width_ratios=ratios)
 
     for i in range(N_plots):
         start_conditions = start_conditions_list[i]
         x0, y0 = start_conditions[0], start_conditions[1]
-        parameters = param_list[i]
 
         system = rungeKutta(t, start_conditions, parameters)
 
-        axs[0].plot(t, system[:, 0], label=rf"Жертвы, $x_0 = {x0}$")
-        axs[0].plot(t, system[:, 1], label=rf"Хищники, $y_0 = {y0}$")
-        axs[1].plot(system[:, 0], system[:, 1])
+        style = "-" if i % 2 == 0 else "--"
         if N_plots == 1:
-            axs[1].plot([x0], [y0], "o", label="Начальная точка")
+            axs[0].plot(t, system[:, 0], label=rf"Жертвы, $x_0 = {x0}$")
+            axs[0].plot(t, system[:, 1], label=rf"Хищники, $y_0 = {y0}$")
+            axs[1].plot(system[:, 0], system[:, 1])
+        else:
+            axs[0].plot(t, system[:, 0], linestyle=style, label=rf"$x_0 = {x0}$")
+            axs[0].plot(t, system[:, 1], linestyle=style, label=rf"$y_0 = {y0}$")
+            axs[1].plot(system[:, 0], system[:, 1], linestyle=style, label=rf"$x_0 = {x0}$, $y_0 = {y0}$")
+
+        if i == N_plots - 1:
+            axs[1].plot([x0], [y0], "o", color="red", label="Нач. точка")
+        else:
+            axs[1].plot([x0], [y0], "o", color="red")
 
     axs[0].set_xlabel(r"$t$, сут")
     axs[0].set_ylabel(r"Численность популяции")
     axs[0].grid()
-    axs[0].legend(loc="center right")
+    axs[0].legend(loc="upper right")
     axs[1].set_xlabel(r"Численность популяции жертв")
     axs[1].set_ylabel(r"Численность популяции хищников")
     axs[1].grid()
@@ -75,8 +85,16 @@ if __name__ == '__main__':
     N = 1500
     t = np.linspace(a, b, N + 1)
 
+    starts1 = [[x0, y0]]
     parameters = [alpha]
 
-    plot_starts(t, [[x0, y0]], [parameters], 1)
-    
+    plot_starts(t, starts1, parameters, 1)
 
+    b = 14
+    t = np.linspace(a, b, N + 1)
+
+    starts2 = [[2, 2],
+              [4, 3],
+              [4, 5]]
+
+    plot_starts(t, starts2, parameters, 2)
